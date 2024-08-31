@@ -2,23 +2,29 @@
 
 import React, { useState } from 'react';
 import NavBar from './NavBar';
+import { useTasks } from './TasksContext';
 
 export default function Home() {
-  const [tasks, setTasks] = useState([
-    { id: 1, name: 'Task 1', description: 'Description for task 1', dueDate: '2024-09-01' },
-    { id: 2, name: 'Task 2', description: 'Description for task 2', dueDate: '2024-09-02' }
-  ]);
-
-  const [newTask, setNewTask] = useState({ name: '', description: '', dueDate: '' });
+  const { tasks, addTask } = useTasks();
+  const [newTask, setNewTask] = useState({ name: '', description:'', dueDate: ''});
 
   const handleAddTask = () => {
-    setTasks([...tasks, { ...newTask, id: tasks.length + 1 }]);
-    setNewTask({ name: '', description: '', dueDate: '' });
+    addTask(newTask);
+    setNewTask({ name: '', description:'', dueDate: ''});
   };
+
+//    { id: 1, name: 'Task 1', description: 'Description for task 1', dueDate: '2024-09-01' },
+//    { id: 2, name: 'Task 2', description: 'Description for task 2', dueDate: '2024-09-02' }
+
+//  const [newTask, setNewTask] = useState({ name: '', description: '', dueDate: '' });
+
+//  const handleAddTask = () => {
+//    setTasks([...tasks, { ...newTask, id: tasks.length + 1 }]);
+//    setNewTask({ name: '', description: '', dueDate: '' });
+//  };
 
   return (
     <>
-      <NavBar />
       <main className='px-5'>
         <h1 className='text-2xl font-bold mb-4'>Your Tasks</h1>
         <ul className='space-y-4'>

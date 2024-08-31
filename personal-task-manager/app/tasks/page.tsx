@@ -1,17 +1,18 @@
 "use client";
 
 import React, { useState } from 'react';
-import NavBar from '../NavBar'; // Adjust the path if necessary
+import { useTasks } from '../TasksContext';
 
 export default function TasksPage() {
-  const [tasks, setTasks] = useState([
-    { id: 1, name: 'Task 1', description: 'Description for task 1', dueDate: '2024-09-01' },
-    { id: 2, name: 'Task 2', description: 'Description for task 2', dueDate: '2024-09-02' }
-  ]);
+    const { tasks } = useTasks();
+  
+//  const [tasks, setTasks] = useState([
+//    { id: 1, name: 'Task 1', description: 'Description for task 1', dueDate: '2024-09-01' },
+//    { id: 2, name: 'Task 2', description: 'Description for task 2', dueDate: '2024-09-02' }
+//  ]);
 
   return (
     <>
-      <NavBar />
       <main className='px-5'>
         <h1 className='text-2xl font-bold mb-4'>All Tasks</h1>
         <ul className='space-y-4'>
