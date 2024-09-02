@@ -6,10 +6,6 @@ import { useTasks } from '../TasksContext';
 export default function TasksPage() {
     const { tasks } = useTasks();
   
-//  const [tasks, setTasks] = useState([
-//    { id: 1, name: 'Task 1', description: 'Description for task 1', dueDate: '2024-09-01' },
-//    { id: 2, name: 'Task 2', description: 'Description for task 2', dueDate: '2024-09-02' }
-//  ]);
 
   return (
     <>

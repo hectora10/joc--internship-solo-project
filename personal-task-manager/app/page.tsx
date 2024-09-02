@@ -6,36 +6,35 @@ import { useTasks } from './TasksContext';
 
 export default function Home() {
   const { tasks, addTask } = useTasks();
-  const [newTask, setNewTask] = useState({ name: '', description:'', dueDate: ''});
+  const [newTask, setNewTask] = useState({ name: '', description:'', dueDate: '', priority: false });
 
   const handleAddTask = () => {
+    if (!newTask.name.trim() || !newTask.dueDate.trim()) {
+      alert("Please fill in the task name and due date.");
+      return;
+    }
     addTask(newTask);
-    setNewTask({ name: '', description:'', dueDate: ''});
+    setNewTask({ name: '', description:'', dueDate: '', priority: false });
   };
-
-//    { id: 1, name: 'Task 1', description: 'Description for task 1', dueDate: '2024-09-01' },
-//    { id: 2, name: 'Task 2', description: 'Description for task 2', dueDate: '2024-09-02' }
-
-//  const [newTask, setNewTask] = useState({ name: '', description: '', dueDate: '' });
-
-//  const handleAddTask = () => {
-//    setTasks([...tasks, { ...newTask, id: tasks.length + 1 }]);
-//    setNewTask({ name: '', description: '', dueDate: '' });
-//  };
 
   return (
     <>
       <main className='px-5'>
         <h1 className='text-2xl font-bold mb-4'>Your Tasks</h1>
-        <ul className='space-y-4'>
-          {tasks.map(task => (
-            <li key={task.id} className='border p-4 rounded-lg shadow'>
-              <h2 className='text-lg font-semibold'>{task.name}</h2>
-              <p>{task.description}</p>
-              <p className='text-sm text-gray-500'>Due: {task.dueDate}</p>
-            </li>
-          ))}
-        </ul>
+        {tasks.length === 0 ? (
+          <p className='text-gray-500'>No pending tasks</p>
+        ) : (
+          <ul className='space-y-4'>
+            {tasks.map(task => (
+              <li key={task.id} className={`border p-4 rounded-lg shadow ${task.priority ? 'bg-yellow-100' : ''}`}>
+                <h2 className='text-lg font-semibold'>{task.name}</h2>
+                <p>{task.description}</p>
+                <p className='text-sm text-gray-500'>Due: {task.dueDate}</p>
+                {task.priority && <span className='text-red-500 font-bold'>High Priority</span>}
+              </li>            
+            ))}
+          </ul>
+        )}
         <div className='mt-8'>
           <h2 className='text-xl font-semibold mb-2'>Add New Task</h2>
           <input
@@ -58,6 +57,15 @@ export default function Home() {
             value={newTask.dueDate}
             onChange={(e) => setNewTask({ ...newTask, dueDate: e.target.value })}
           />
+          <label className='block mb-4'>
+            <input
+              type='checkbox'
+              className='mr-2'
+              checked={newTask.priority}
+              onChange={(e) => setNewTask({ ...newTask, priority: e.target.checked })}
+            />
+            Mark as High Priority
+          </label>
           <button
             onClick={handleAddTask}
             className='bg-blue-500 text-white px-4 py-2 rounded'>

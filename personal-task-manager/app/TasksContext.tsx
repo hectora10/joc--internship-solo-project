@@ -1,17 +1,23 @@
 "use client";
 
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
+// import { PrismaClient } from '@prisma/client';
+
+// const prisma = new PrismaClient();
 
 interface Task {
   id: number;
   name: string;
   description: string;
   dueDate: string;
+  priority: boolean;
 }
 
 interface TasksContextType {
   tasks: Task[];
   addTask: (task: Omit<Task, 'id'>) => void;
+  deleteTask: (id: number) => Promise<void>;
+  editTask: (id: number, updatedTask: Omit<Task, 'id'>) => Promise<void>;
 }
 
 const TasksContext = createContext<TasksContextType | undefined>(undefined);
@@ -19,17 +25,74 @@ const TasksContext = createContext<TasksContextType | undefined>(undefined);
 export const TasksProvider = ({ children }: { children: ReactNode }) => {
     const [tasks, setTasks] = useState<Task[]>([]);
 
-    const addTask = (newTask: Omit<Task, 'id'>) => {
-        setTasks([...tasks, { ...newTask, id: tasks.length +1 }]);
+    useEffect(() => {
+        const fetchTasks = async () => {
+            const response = await fetch('/api/tasks');
+            if (!response.ok) {
+                console.error('Error fetching tasks:', response.status, await response.text());
+                return;
+            }
+            const data = await response.json();
+            setTasks(data);
+        };
+        fetchTasks();
+    }, []);
+
+
+    const addTask = async (newTask: Omit<Task, 'id'>) => {
+        const { dueDate, ...rest } = newTask;
+        const formattedDueDate = new Date(dueDate).toISOString(); 
+
+        const response = await fetch('/api/tasks', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({...rest, dueDate: formattedDueDate }),
+        }); 
+
+        if (!response.ok) {
+            const text = await response.text();
+            console.error('Error adding task:', response.status, text);
+            return;
+        }
+
+        const taskWithId = await response.json();
+        setTasks((prevTasks) => [...prevTasks, taskWithId]);
     };
-  
-//  const [tasks, setTasks] = useState<Task[]>([
-//    { id: 1, name: 'Task 1', description: 'Description for task 1', dueDate: '2024-09-01' },
-//    { id: 2, name: 'Task 2', description: 'Description for task 2', dueDate: '2024-09-02' }
-//  ]);
+
+
+    const deleteTask = async (id: number) => {
+        const response = await fetch('/api/tasks', {
+            method: 'DELETE',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id }),
+        });
+
+        if (!response.ok) {
+            console.error('Error deleting task:', response.status, await response.text());
+            return;
+        }
+
+        setTasks((prevTasks) => prevTasks.filter(task => task.id !==id));
+    };
+
+    const editTask = async (id: number, updatedTask: Omit<Task, 'id'>) => {
+        const response = await fetch('/api/tasks', {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id, ...updatedTask }),
+        });
+
+        if (!response.ok) {
+            console.error('Error updating task:', response.status, await response.text());
+            return;
+        }
+
+        const task = await response.json();
+        setTasks((prevTasks) => prevTasks.map(t => (t.id === id ? task : t)));
+    };
 
   return (
-    <TasksContext.Provider value={{ tasks, addTask }}>
+    <TasksContext.Provider value={{ tasks, addTask, deleteTask, editTask }}>
       {children}
     </TasksContext.Provider>
   );

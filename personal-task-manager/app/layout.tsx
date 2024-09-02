@@ -49,13 +49,12 @@ export default function RootLayout({
               </div>
             </aside>
 
-            <main className="flex-1 p-8 bg-gray-100 overflow-auto">
+            <main className="flex-1 p-2 bg-gray-100 overflow-auto">
               <NavBar />
               <header className="mb-6">
-                <h1 className="text-3xl font-bold">My Personal Task Manager</h1>
+                <h1 className="text-3xl font-bold">Personal Task Manager</h1>
               </header>
               <section className="mb-6">
-                <h2 className="text-2xl font-semibold mb-4">Your Tasks</h2>
                 {children} 
               </section>
             </main>
