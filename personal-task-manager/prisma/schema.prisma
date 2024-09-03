@@ -7,12 +7,14 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model task {
+model Task {
   id          Int      @id @default(autoincrement())
-  name        String
-  description String?
-  dueDate     DateTime
+  name        String   @db.VarChar(191)
+  description String?  @db.VarChar(191)
+  dueDate     DateTime @db.DateTime(3)
   priority    Boolean
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+
+  @@map("task")
 }

@@ -1,9 +1,7 @@
 "use client";
 
 import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
-// import { PrismaClient } from '@prisma/client';
 
-// const prisma = new PrismaClient();
 
 interface Task {
   id: number;
@@ -76,6 +74,7 @@ export const TasksProvider = ({ children }: { children: ReactNode }) => {
     };
 
     const editTask = async (id: number, updatedTask: Omit<Task, 'id'>) => {
+        console.log('Updating Task:', id, updatedTask); // Log the task ID and updated task data
         const response = await fetch('/api/tasks', {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
@@ -88,6 +87,7 @@ export const TasksProvider = ({ children }: { children: ReactNode }) => {
         }
 
         const task = await response.json();
+        console.log('Task from server:', task); // Log the updated task returned from the server
         setTasks((prevTasks) => prevTasks.map(t => (t.id === id ? task : t)));
     };
 

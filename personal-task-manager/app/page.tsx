@@ -1,12 +1,15 @@
 "use client";
 
 import React, { useState } from 'react';
-import NavBar from './NavBar';
 import { useTasks } from './TasksContext';
+import EditTaskForm from './components/EditTaskForm';
+import { Task } from './types';
 
-export default function Home() {
-  const { tasks, addTask } = useTasks();
+const Home: React.FC = () => {
+  const { tasks, addTask, editTask } = useTasks();
   const [newTask, setNewTask] = useState({ name: '', description:'', dueDate: '', priority: false });
+  const [editingTask, setEditingTask] = useState<Task | null>(null);
+
 
   const handleAddTask = () => {
     if (!newTask.name.trim() || !newTask.dueDate.trim()) {
@@ -15,6 +18,17 @@ export default function Home() {
     }
     addTask(newTask);
     setNewTask({ name: '', description:'', dueDate: '', priority: false });
+  };
+
+  const handleEditTask = (task: Task) => {
+    setEditingTask(task);
+  };
+
+  const handleSaveEdit = async (id: number, updatedTask: Omit<Task, 'id'>) => {
+    if (editingTask) {
+      await editTask(id, updatedTask);
+      setEditingTask(null);
+    }
   };
 
   return (
@@ -31,10 +45,22 @@ export default function Home() {
                 <p>{task.description}</p>
                 <p className='text-sm text-gray-500'>Due: {task.dueDate}</p>
                 {task.priority && <span className='text-red-500 font-bold'>High Priority</span>}
+                <button onClick={() => handleEditTask(task)} className='bg-green-500 text-white px-2 py-1 rounded mt-2'>
+                  Edit Task
+                </button>
               </li>            
             ))}
           </ul>
         )}
+
+        {editingTask && (
+          <EditTaskForm 
+            task={editingTask} 
+            onSave={handleSaveEdit}
+            onCancel={() => setEditingTask(null)}
+          />
+        )}
+
         <div className='mt-8'>
           <h2 className='text-xl font-semibold mb-2'>Add New Task</h2>
           <input
@@ -77,3 +103,4 @@ export default function Home() {
   );
 }
 
+export default Home;
