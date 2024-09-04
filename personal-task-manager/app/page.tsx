@@ -6,8 +6,8 @@ import EditTaskForm from './components/EditTaskForm';
 import { Task } from './types';
 
 const Home: React.FC = () => {
-  const { tasks, addTask, editTask } = useTasks();
-  const [newTask, setNewTask] = useState({ name: '', description:'', dueDate: '', priority: false });
+  const { tasks, addTask, editTask, deleteTask, markComplete } = useTasks();
+  const [newTask, setNewTask] = useState({ name: '', description:'', dueDate: '', priority: false, completed: false });
   const [editingTask, setEditingTask] = useState<Task | null>(null);
 
 
@@ -17,7 +17,7 @@ const Home: React.FC = () => {
       return;
     }
     addTask(newTask);
-    setNewTask({ name: '', description:'', dueDate: '', priority: false });
+    setNewTask({ name: '', description:'', dueDate: '', priority: false, completed: false });
   };
 
   const handleEditTask = (task: Task) => {
@@ -41,13 +41,39 @@ const Home: React.FC = () => {
           <ul className='space-y-4'>
             {tasks.map(task => (
               <li key={task.id} className={`border p-4 rounded-lg shadow ${task.priority ? 'bg-yellow-100' : ''}`}>
-                <h2 className='text-lg font-semibold'>{task.name}</h2>
-                <p>{task.description}</p>
-                <p className='text-sm text-gray-500'>Due: {task.dueDate}</p>
-                {task.priority && <span className='text-red-500 font-bold'>High Priority</span>}
-                <button onClick={() => handleEditTask(task)} className='bg-green-500 text-white px-2 py-1 rounded mt-2'>
-                  Edit Task
-                </button>
+                <div>
+                  <h2 className='text-lg font-semibold'>{task.name}</h2>
+                  <p>{task.description}</p>
+                  <p className='text-sm text-gray-500'>
+                    Due: {new Date(task.dueDate).toLocaleDateString('en-US', {
+                      year: 'numeric',
+                      month: '2-digit',
+                      day: '2-digit'
+                    })}
+                  </p>
+                  {task.priority && (
+                    <div>
+                      <span className='text-red-500 font-bold'>High Priority</span>
+                    </div>
+                  )}
+                  <div>
+                    <button onClick={() => handleEditTask(task)} className='bg-green-500 text-white px-2 py-1 text-sm rounded mr-2'>
+                      Edit Task
+                    </button>
+                    <button onClick={() => deleteTask(task.id)} className='bg-red-500 text-white px-2 py-1 text-sm rounded'>
+                      Delete Task
+                    </button>
+                  </div> 
+                </div>
+                <div>
+                  <input
+                    type='checkbox'
+                    checked={task.completed}
+                    onChange={() => markComplete(task.id)}
+                    className='mr-2'
+                  />
+                  <label>Complete</label>
+                </div>
               </li>            
             ))}
           </ul>

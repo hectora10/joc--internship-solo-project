@@ -12,11 +12,12 @@ const EditTaskForm: React.FC<EditTaskProps> = ({ task, onSave, onCancel }) => {
   const [description, setDescription] = useState(task.description);
   const [dueDate, setDueDate] = useState(task.dueDate);
   const [priority, setPriority] = useState(task.priority);
+  const [completed, setCompleted] = useState(task.completed);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('Submitting edit with data:', { name, description, dueDate, priority });
-    onSave(task.id, { name, description, dueDate, priority });
+    console.log('Submitting edit with data:', { name, description, dueDate, priority, completed });
+    onSave(task.id, { name, description, dueDate, priority, completed });
   };
 
   return (

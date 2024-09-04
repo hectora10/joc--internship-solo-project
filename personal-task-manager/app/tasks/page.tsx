@@ -7,7 +7,7 @@ import { Task } from '../types';
 
 
 export default function TasksPage() {
-    const { tasks, editTask } = useTasks();
+    const { tasks, editTask, deleteTask, markComplete } = useTasks();
     const [editingTask, setEditingTask] = useState<Task | null>(null);
 
     const handleEditTask = (task: Task) => {
@@ -17,10 +17,7 @@ export default function TasksPage() {
     const handleSaveEdit = async (id: number, updatedTask: Omit<Task, 'id'>) => {
         if (editingTask) {
             const isoDueDate = new Date(updatedTask.dueDate).toISOString();
-            console.log('Editing Task:', editingTask); // Log the task currently being edited
-            console.log('Updated Task:', updatedTask); // Log the updated task data
             await editTask(id, { ...updatedTask, dueDate: isoDueDate });
-            console.log('Task updated'); // Confirm that the editTask function was called
             setEditingTask(null);
         }    
     };
@@ -34,13 +31,39 @@ export default function TasksPage() {
                         <li key={task.id} className='border p-4 rounded-lg shadow'>
                             <h2 className='text-lg font-semibold'>{task.name}</h2>
                             <p>{task.description}</p>
-                            <p className='text-sm text-gray-500'>Due: {task.dueDate}</p>
-                            {task.priority && <span className='text-red-500 font-bold'>High Priority</span>}
-                            <button
-                                onClick={() => handleEditTask(task)}
-                                className='bg-green-500 text-white px-2 py-1 rounded mt-2'>
-                                Edit Task
-                            </button>
+                            <p className='text-sm text-gray-500'>
+                                Due: {new Date(task.dueDate).toLocaleDateString('en-US', {
+                                    year: 'numeric',
+                                    month: '2-digit',
+                                    day: '2-digit',
+                                })}
+                            </p>
+                            {task.priority && (
+                                <div>
+                                    <span className='text-red-500 font-bold'>High Priority</span>
+                                </div>
+                            )}
+                            <div>
+                                <button
+                                    onClick={() => handleEditTask(task)}
+                                    className='bg-green-500 text-white text-sm px-2 py-1 rounded mr-2'>
+                                    Edit Task
+                                </button>
+                                <button
+                                    onClick ={() => deleteTask(task.id)} 
+                                    className='bg-red-500 text-white text-sm px-2 py-1 rounded'>
+                                    Delete Task
+                                </button>
+                            </div>
+                            <div>
+                                <input
+                                    type='checkbox'
+                                    checked={task.completed}
+                                    onChange={() => markComplete(task.id)}
+                                    className='mr-2'
+                                />
+                                <label>Complete</label>
+                            </div>
                         </li>
                     ))}
                 </ul>
@@ -52,6 +75,7 @@ export default function TasksPage() {
                         onCancel={() => setEditingTask(null)}
                     />
                 )}
+
             </main>
         </>
     );

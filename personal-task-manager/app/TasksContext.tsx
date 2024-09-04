@@ -1,24 +1,26 @@
 "use client";
 
-import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
+import React, { createContext, useContext, useState, ReactNode, useEffect, useCallback } from 'react';
+import { Task } from './types';
 
-
-interface Task {
-  id: number;
-  name: string;
-  description: string;
-  dueDate: string;
-  priority: boolean;
-}
 
 interface TasksContextType {
   tasks: Task[];
   addTask: (task: Omit<Task, 'id'>) => void;
   deleteTask: (id: number) => Promise<void>;
   editTask: (id: number, updatedTask: Omit<Task, 'id'>) => Promise<void>;
+  markComplete: (id: number) => Promise<void>;
 }
 
 const TasksContext = createContext<TasksContextType | undefined>(undefined);
+
+export const useTasks = () => {
+    const context = useContext(TasksContext);
+    if (!context) {
+        throw new Error('useTasks must be used within a TasksProvider');
+    }
+    return context;
+}
 
 export const TasksProvider = ({ children }: { children: ReactNode }) => {
     const [tasks, setTasks] = useState<Task[]>([]);
@@ -37,7 +39,7 @@ export const TasksProvider = ({ children }: { children: ReactNode }) => {
     }, []);
 
 
-    const addTask = async (newTask: Omit<Task, 'id'>) => {
+    const addTask = useCallback(async (newTask: Omit<Task, 'id'>) => {
         const { dueDate, ...rest } = newTask;
         const formattedDueDate = new Date(dueDate).toISOString(); 
 
@@ -55,26 +57,24 @@ export const TasksProvider = ({ children }: { children: ReactNode }) => {
 
         const taskWithId = await response.json();
         setTasks((prevTasks) => [...prevTasks, taskWithId]);
-    };
+    }, []);
 
 
-    const deleteTask = async (id: number) => {
+    const deleteTask = useCallback(async (id: number) => {
+        setTasks((prevTasks) => prevTasks.filter(task => task.id !==id));
+
         const response = await fetch('/api/tasks', {
             method: 'DELETE',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ id }),
         });
-
+        
         if (!response.ok) {
             console.error('Error deleting task:', response.status, await response.text());
-            return;
-        }
+        }    
+    }, [tasks]);
 
-        setTasks((prevTasks) => prevTasks.filter(task => task.id !==id));
-    };
-
-    const editTask = async (id: number, updatedTask: Omit<Task, 'id'>) => {
-        console.log('Updating Task:', id, updatedTask); // Log the task ID and updated task data
+    const editTask = useCallback(async (id: number, updatedTask: Omit<Task, 'id'>) => {
         const response = await fetch('/api/tasks', {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
@@ -87,21 +87,40 @@ export const TasksProvider = ({ children }: { children: ReactNode }) => {
         }
 
         const task = await response.json();
-        console.log('Task from server:', task); // Log the updated task returned from the server
         setTasks((prevTasks) => prevTasks.map(t => (t.id === id ? task : t)));
-    };
+    }, []);
+
+    const markComplete = useCallback(async (id: number) => {
+        const task = tasks.find(t => t.id === id);
+        if (!task) return;
+        const updatedCompletedStatus = !task.completed;
+
+        setTasks((prevTasks) =>
+            prevTasks.map((t) =>
+                t.id === id ? { ...t, completed: updatedCompletedStatus } : t
+            )
+        );
+        const response = await fetch('/api/tasks/complete', {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id, completed: updatedCompletedStatus }),
+        });
+
+        if (!response.ok) {
+            console.error('Error marking task as complete:', response.status, await response.text());
+        
+            setTasks((prevTasks) =>
+                prevTasks.map((t) =>
+                    t.id === id ? { ...t, completed: task.completed } : t
+                )
+            );
+        }
+    }, [tasks]);
 
   return (
-    <TasksContext.Provider value={{ tasks, addTask, deleteTask, editTask }}>
+    <TasksContext.Provider value={{ tasks, addTask, deleteTask, editTask, markComplete }}>
       {children}
     </TasksContext.Provider>
   );
 };
 
-export const useTasks = () => {
-  const context = useContext(TasksContext);
-  if (!context) {
-    throw new Error('useTasks must be used within a TasksProvider');
-  }
-  return context;
-};

@@ -62,18 +62,27 @@ export async function DELETE(req: NextRequest) {
 
 export async function PUT(req: NextRequest) {
     try {
-        const { id, name, description, dueDate, priority } = await req.json();
-        console.log('Request data:', { id, name, description, dueDate, priority });
+        const { id, name, description, dueDate, priority, completed } = await req.json();
+        console.log('Request data:', { id, name, description, dueDate, priority, completed });
 
-        const isoDueDate = new Date(dueDate).toISOString() // Format to yyyy-MM-dd
-
-        if (!id || !name || !description || !dueDate) {
-            throw new Error('Missing required fields: id, name, description, dueDate');
+        if (!id) {
+            throw new Error('Missing task ID');
         }
-        
+        let updateData: any = {};
+        if (typeof completed !== 'undefined') {
+            updateData.completed = completed;
+        } else {
+            if (!name || !description || !dueDate) {
+                throw new Error('Missing required fields: name, description, dueDate');
+            }
+
+            const isoDueDate = new Date(dueDate).toISOString() // Format to yyyy-MM-dd
+            updateData = { name, description, dueDate: isoDueDate, priority };
+        }
+
         const updatedTask = await prisma.task.update({
             where: { id: Number(id) },
-            data: { name, description, dueDate: isoDueDate, priority },
+            data: updateData,
         });
 
         console.log('Task successfully updated:', updatedTask);
