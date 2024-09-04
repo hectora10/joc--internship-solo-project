@@ -1,9 +1,11 @@
 import { NextResponse } from "next/server";
 import { PrismaClient } from "@prisma/client";
 
+const prisma = new PrismaClient
+
 export async function PUT(request: Request) {
     try {
-      const { id } = await request.json();
+      const { id, completed } = await request.json();
       
       if (!id) {
         return NextResponse.json({ error: 'Task ID is required' }, { status: 400 });
@@ -11,7 +13,7 @@ export async function PUT(request: Request) {
   
       const task = await prisma.task.update({
         where: { id: Number(id) },
-        data: { completed: true },
+        data: { completed: completed !== undefined ? completed : true },
       });
   
       return NextResponse.json(task);

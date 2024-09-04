@@ -8,8 +8,9 @@ interface TasksContextType {
   tasks: Task[];
   addTask: (task: Omit<Task, 'id'>) => void;
   deleteTask: (id: number) => Promise<void>;
-  editTask: (id: number, updatedTask: Omit<Task, 'id'>) => Promise<void>;
+  editTask: (id: number, updatedTask: Omit<Task, 'id'>) => Promise<Task>;
   markComplete: (id: number) => Promise<void>;
+  setTasks: React.Dispatch<React.SetStateAction<Task[]>>;
 }
 
 const TasksContext = createContext<TasksContextType | undefined>(undefined);
@@ -72,9 +73,9 @@ export const TasksProvider = ({ children }: { children: ReactNode }) => {
         if (!response.ok) {
             console.error('Error deleting task:', response.status, await response.text());
         }    
-    }, [tasks]);
+    }, []);
 
-    const editTask = useCallback(async (id: number, updatedTask: Omit<Task, 'id'>) => {
+    const editTask = useCallback(async (id: number, updatedTask: Omit<Task, 'id'>): Promise<Task> => {
         const response = await fetch('/api/tasks', {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
@@ -83,11 +84,12 @@ export const TasksProvider = ({ children }: { children: ReactNode }) => {
 
         if (!response.ok) {
             console.error('Error updating task:', response.status, await response.text());
-            return;
+            return Promise.reject('Failed to update task');
         }
 
         const task = await response.json();
-        setTasks((prevTasks) => prevTasks.map(t => (t.id === id ? task : t)));
+        setTasks((prevTasks) => prevTasks.map((t) => (t.id === id ? task : t)));
+        return task;
     }, []);
 
     const markComplete = useCallback(async (id: number) => {
@@ -108,7 +110,6 @@ export const TasksProvider = ({ children }: { children: ReactNode }) => {
 
         if (!response.ok) {
             console.error('Error marking task as complete:', response.status, await response.text());
-        
             setTasks((prevTasks) =>
                 prevTasks.map((t) =>
                     t.id === id ? { ...t, completed: task.completed } : t
@@ -118,7 +119,7 @@ export const TasksProvider = ({ children }: { children: ReactNode }) => {
     }, [tasks]);
 
   return (
-    <TasksContext.Provider value={{ tasks, addTask, deleteTask, editTask, markComplete }}>
+    <TasksContext.Provider value={{ tasks, addTask, deleteTask, editTask, markComplete, setTasks }}>
       {children}
     </TasksContext.Provider>
   );

@@ -68,7 +68,7 @@ export async function PUT(req: NextRequest) {
         if (!id) {
             throw new Error('Missing task ID');
         }
-        let updateData: any = {};
+        const updateData: any = {};
         if (typeof completed !== 'undefined') {
             updateData.completed = completed;
         } else {
@@ -76,8 +76,11 @@ export async function PUT(req: NextRequest) {
                 throw new Error('Missing required fields: name, description, dueDate');
             }
 
-            const isoDueDate = new Date(dueDate).toISOString() // Format to yyyy-MM-dd
-            updateData = { name, description, dueDate: isoDueDate, priority };
+            const isoDueDate = new Date(dueDate).toISOString() 
+            updateData.name = name;
+            updateData.description = description;
+            updateData.dueDate = isoDueDate;
+            updateData.priority = priority;
         }
 
         const updatedTask = await prisma.task.update({
