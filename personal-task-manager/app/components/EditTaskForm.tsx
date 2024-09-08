@@ -16,8 +16,11 @@ const EditTaskForm: React.FC<EditTaskProps> = ({ task, onSave, onCancel }) => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('Submitting edit with data:', { name, description, dueDate, priority, completed });
     onSave(task.id, { name, description, dueDate, priority, completed });
+  };
+
+  const handleCheckboxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setCompleted(e.target.checked);
   };
 
   return (
@@ -68,6 +71,17 @@ const EditTaskForm: React.FC<EditTaskProps> = ({ task, onSave, onCancel }) => {
             className='mr-2'
           />
           <label htmlFor='taskPriority'>High Priority</label>
+        </div>
+        <div className='flex items-center mb-4'>
+          <input
+            type="checkbox"
+            id='taskCompleted'
+            name='taskCompleted'
+            checked={completed}
+            onChange={handleCheckboxChange}
+            className='mr-2'
+          />
+          <label htmlFor='taskCompleted'>Completed</label>
         </div>
         <div className="flex space-x-2">
           <button

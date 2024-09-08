@@ -3,14 +3,13 @@
 import React, { useState } from 'react';
 import { useTasks } from './TasksContext';
 import EditTaskForm from './components/EditTaskForm';
-import { Task } from './types';
 import TasksList from './components/TasksList';
 import { useTaskHandlers } from './useTaskHandlers';
 
 
 const Home: React.FC = () => {
-  const { tasks, addTask, deleteTask, markComplete } = useTasks();
-  const { editingTask, handleEditTask, handleSaveEdit, setEditingTask } = useTaskHandlers();
+  const { tasks, addTask } = useTasks();
+  const { editingTask, handleSaveEdit, setEditingTask } = useTaskHandlers();
   const [newTask, setNewTask] = useState({ name: '', description:'', dueDate: '', priority: false, completed: false });
 
   const handleAddTask = () => {
@@ -44,7 +43,7 @@ const Home: React.FC = () => {
           <input
             type='date'
             className='border p-2 mb-4 w-full'
-            value={newTask.dueDate}
+            value={newTask.dueDate || ""}
             onChange={(e) => setNewTask({ ...newTask, dueDate: e.target.value })}
           />
           <label className='block mb-4'>
@@ -67,13 +66,7 @@ const Home: React.FC = () => {
         {tasks.length === 0 ? (
           <p className='text-gray-500'>No pending tasks</p>
         ) : (
-
-          <TasksList
-            tasks={tasks}
-            handleEditTask={handleEditTask}
-            deleteTask={deleteTask}
-            markComplete={markComplete}
-          />
+          <TasksList />
         )}
 
         {editingTask && (

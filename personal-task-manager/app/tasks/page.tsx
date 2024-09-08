@@ -3,14 +3,13 @@
 import React, { useState } from 'react';
 import { useTasks } from '../TasksContext';
 import EditTaskForm from '../components/EditTaskForm';
-import { Task } from '../types';
 import TasksList from '../components/TasksList';
 import { useTaskHandlers } from '../useTaskHandlers';
 
 
 export default function TasksPage() {
-    const { tasks, deleteTask, markComplete } = useTasks();
-    const { editingTask, handleEditTask, handleSaveEdit, setEditingTask } = useTaskHandlers();
+    const { tasks } = useTasks();
+    const { editingTask, handleSaveEdit, setEditingTask } = useTaskHandlers();
 
     return (
         <>
@@ -20,12 +19,7 @@ export default function TasksPage() {
                 {tasks.length === 0 ? (
                     <p className='text-gray-500'>No pending tasks</p>
                 ) : (
-                    <TasksList
-                        tasks={tasks}
-                        handleEditTask={handleEditTask}
-                        deleteTask={deleteTask}
-                        markComplete={markComplete}
-                    />
+                    <TasksList />
                 )}    
 
                 {editingTask && (

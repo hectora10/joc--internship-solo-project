@@ -11,6 +11,15 @@ interface TasksContextType {
   editTask: (id: number, updatedTask: Omit<Task, 'id'>) => Promise<Task>;
   markComplete: (id: number) => Promise<void>;
   setTasks: React.Dispatch<React.SetStateAction<Task[]>>;
+  editingTask: Task | null;  
+  setEditingTask: React.Dispatch<React.SetStateAction<Task | null>>;
+  sortOption: 'dueDate' | 'priority' | 'completed' | null;
+  setSortOption: React.Dispatch<React.SetStateAction<'dueDate' | 'priority' | 'completed' | null>>;
+  filterOption: 'highPriority' | 'completed' | 'category' | null;
+  setFilterOption: React.Dispatch<React.SetStateAction<'highPriority' | 'completed' | 'category' | null>>; 
+  handleEditTask: (task: Task) => void;
+  handleSaveEdit: (id: number, updatedTask: Omit<Task, 'id'>) => Promise<void>;
+  handleCancelEdit: () => void;
 }
 
 const TasksContext = createContext<TasksContextType | undefined>(undefined);
@@ -25,6 +34,10 @@ export const useTasks = () => {
 
 export const TasksProvider = ({ children }: { children: ReactNode }) => {
     const [tasks, setTasks] = useState<Task[]>([]);
+    const [editingTask, setEditingTask] = useState<Task | null>(null);
+
+    const [sortOption, setSortOption] = useState<'dueDate' | 'priority' | 'completed' | null>(null);
+    const [filterOption, setFilterOption] = useState<'highPriority' | 'completed' | 'category' | null>(null);
 
     useEffect(() => {
         const fetchTasks = async () => {
@@ -39,10 +52,44 @@ export const TasksProvider = ({ children }: { children: ReactNode }) => {
         fetchTasks();
     }, []);
 
+    const sortTasks = (tasks: Task[]) => {
+        if (sortOption === 'dueDate') {
+            return [...tasks].sort((a, b) => new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime());
+        }
+        if (sortOption === 'priority') {
+            return [...tasks].sort((a, b) => (b.priority ? 1 : -1));
+        }
+        if (sortOption === 'completed') {
+            return [...tasks].sort((a, b) => (a.completed === b.completed ? 0 : a.completed ? 1 : -1));
+        }
+        return tasks;
+    };
+
+    const filterTasks = (tasks: Task[]) => {
+        if (filterOption === 'highPriority') {
+            return tasks.filter(task => task.priority);
+        }
+        if (filterOption === 'completed') {
+            return tasks.filter(task => task.completed);
+        }
+        if (filterOption === 'category') {
+            return tasks.filter(task => task.category === 'your-category'); 
+        }
+        return tasks;
+    };
+
+    const getProcessedTasks = () => {
+        let processedTasks = [...tasks];
+        processedTasks = filterTasks(processedTasks);
+        processedTasks = sortTasks(processedTasks);
+        return processedTasks;
+    };
 
     const addTask = useCallback(async (newTask: Omit<Task, 'id'>) => {
         const { dueDate, ...rest } = newTask;
-        const formattedDueDate = new Date(dueDate).toISOString(); 
+
+        const localDate = new Date(dueDate);
+        const formattedDueDate = localDate.toISOString().split('T')[0];
 
         const response = await fetch('/api/tasks', {
             method: 'POST',
@@ -118,8 +165,39 @@ export const TasksProvider = ({ children }: { children: ReactNode }) => {
         }
     }, [tasks]);
 
+    const processedTasks = getProcessedTasks();
+
+    const handleEditTask = (task: Task) => {
+        setEditingTask(task);
+      };
+      
+      const handleSaveEdit = async (id: number, updatedTask: Omit<Task, 'id'>) => {
+        await editTask(id, updatedTask);
+        setEditingTask(null);
+      };
+      
+      const handleCancelEdit = () => {
+        setEditingTask(null);
+      };
+
   return (
-    <TasksContext.Provider value={{ tasks, addTask, deleteTask, editTask, markComplete, setTasks }}>
+    <TasksContext.Provider value={{ 
+        tasks: processedTasks, 
+        addTask, 
+        deleteTask, 
+        editTask, 
+        markComplete, 
+        setTasks, 
+        editingTask, 
+        setEditingTask,
+        sortOption,
+        setSortOption,
+        filterOption,
+        setFilterOption,
+        handleEditTask,    
+        handleSaveEdit,    
+        handleCancelEdit 
+    }}>
       {children}
     </TasksContext.Provider>
   );

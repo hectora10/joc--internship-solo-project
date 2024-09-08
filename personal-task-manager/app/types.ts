@@ -5,5 +5,6 @@ export interface Task {
     dueDate: string;
     priority: boolean;
     completed: boolean;
+    category?: string;
   }
   

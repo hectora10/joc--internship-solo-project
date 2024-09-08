@@ -14,8 +14,8 @@ export const useTaskHandlers = () => {
     if (editingTask) {
         const isoDueDate = new Date(updatedTask.dueDate).toISOString();
         try{
-            const updatedTaskResponse = await editTask(id, { ...updatedTask, dueDate: isoDueDate });
-        
+            await editTask(id, { ...updatedTask, dueDate: isoDueDate });
+
             setTasks(prevTasks =>
                 prevTasks.map(task =>
                     task.id === id ? { ...task, ...updatedTask, dueDate: isoDueDate } : task
@@ -29,5 +29,9 @@ export const useTaskHandlers = () => {
     }
   };
 
-  return { editingTask, handleEditTask, handleSaveEdit, setEditingTask };
+  const handleCancelEdit = () => {
+    setEditingTask(null);
+  };
+
+  return { editingTask, handleEditTask, handleSaveEdit, handleCancelEdit, setEditingTask };
 };
