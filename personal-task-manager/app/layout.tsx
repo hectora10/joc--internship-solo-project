@@ -31,9 +31,6 @@ export default function RootLayout({
                   <li>
                     <a href="/tasks" className="block p-2 rounded hover:bg-gray-700">Tasks</a>
                   </li>
-                  <li>
-                    <a href="/profile" className="block p-2 rounded hover:bg-gray-700">Profile</a>
-                  </li>
                 </ul>
               </div>
               <div className="mt-auto">

@@ -1,6 +1,7 @@
 import React, { useContext } from 'react';
 import EditTaskForm from './EditTaskForm';
 import { useTasks } from '../TasksContext';
+import { Task } from '../types';
 
 
 const formatLocalDate = (isoDate: string) => {
@@ -8,9 +9,13 @@ const formatLocalDate = (isoDate: string) => {
   return localDate.toISOString().split('T')[0];
 };
 
-const TasksList: React.FC = () => { 
-  const {
-    tasks, 
+interface TasksListProps {
+  tasks : Task []
+  showSortAndFilter?: boolean; 
+}
+
+const TasksList: React.FC<TasksListProps> = ({ tasks, showSortAndFilter = false }) => { 
+  const { 
     handleEditTask, 
     deleteTask, 
     markComplete,
@@ -23,34 +28,36 @@ const TasksList: React.FC = () => {
 
   return (
     <div>
-      <div className='mb-4'>
-        <label htmlFor='sort' className='mr-2'>Sort by:</label>
-        <select
-          id='sort'
-          onChange={(e) => setSortOption(e.target.value as 'dueDate' | 'priority' | 'completed')}
-          className='p-2 border rounded'
-        >
-          <option value=''>None</option>
-          <option value='dueDate'>Due Date</option>
-          <option value='priority'>Priority</option>
-          <option value='completed'>Completed</option>
-        </select>
-      </div>
+      {showSortAndFilter && ( 
+        <>
+          <div className='mb-4'>
+            <label htmlFor='sort' className='mr-2'>Sort by:</label>
+            <select
+              id='sort'
+              onChange={(e) => setSortOption(e.target.value as 'dueDate' | 'priority' | 'completed')}
+              className='p-2 border rounded'
+            >
+              <option value=''>None</option>
+              <option value='dueDate'>Due Date</option>
+              <option value='priority'>Priority</option>
+              <option value='completed'>Completion</option>
+            </select>
+          </div>
 
-      <div className='mb-4'>
-        <label htmlFor='filter' className='mr-2'>Filter by:</label>
-        <select
-          id='filter'
-          onChange={(e) => setFilterOption(e.target.value as 'highPriority' | 'completed' | 'category')}
-          className='p-2 border rounded'
-        >
-          <option value=''>None</option>
-          <option value='highPriority'>High Priority</option>
-          <option value='completed'>Completed</option>
-          <option value='category'>Category</option>
-        </select>
-      </div>
-
+          <div className='mb-4'>
+            <label htmlFor='filter' className='mr-2'>Filter by:</label>
+            <select
+              id='filter'
+              onChange={(e) => setFilterOption(e.target.value as 'highPriority' | 'completed' | 'category')}
+              className='p-2 border rounded'
+            >
+              <option value=''>None</option>
+              <option value='highPriority'>High Priority</option>
+              <option value='completed'>Completed</option>
+            </select>
+          </div>
+        </>
+      )}
 
       <ul className='space-y-4'>
         {tasks.map(task => (

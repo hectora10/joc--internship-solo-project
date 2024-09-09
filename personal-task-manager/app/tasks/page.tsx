@@ -19,7 +19,7 @@ export default function TasksPage() {
                 {tasks.length === 0 ? (
                     <p className='text-gray-500'>No pending tasks</p>
                 ) : (
-                    <TasksList />
+                    <TasksList tasks={tasks} showSortAndFilter={true} />
                 )}    
 
                 {editingTask && (

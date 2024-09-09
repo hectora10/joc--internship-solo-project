@@ -10,15 +10,25 @@ export const useTaskHandlers = () => {
     setEditingTask(task);
   };
 
-  const handleSaveEdit = async (id: number, updatedTask: Omit<Task, 'id'>) => {
+  const handleSaveEdit = async (id: number, updatedTask: Partial<Omit<Task, 'id'>>) => {
     if (editingTask) {
-        const isoDueDate = new Date(updatedTask.dueDate).toISOString();
-        try{
-            await editTask(id, { ...updatedTask, dueDate: isoDueDate });
+        const taskToSave = {
+            name: updatedTask.name ?? editingTask.name,
+            description: updatedTask.description ?? editingTask.description,
+            priority: updatedTask.priority ?? editingTask.priority,
+            completed: updatedTask.completed ?? editingTask.completed,
+            dueDate: new Date(updatedTask.dueDate ?? editingTask.dueDate).toISOString(),
+          };
 
-            setTasks(prevTasks =>
-                prevTasks.map(task =>
-                    task.id === id ? { ...task, ...updatedTask, dueDate: isoDueDate } : task
+
+
+//        const isoDueDate = new Date(updatedTask.dueDate ?? editingTask.dueDate).toISOString();
+        try{
+            await editTask(id, taskToSave);
+
+            setTasks((prevTasks) =>
+                prevTasks.map((task) =>
+                    task.id === id ? { ...task, ...taskToSave } : task
                 )
             );
 

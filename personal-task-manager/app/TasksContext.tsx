@@ -72,9 +72,6 @@ export const TasksProvider = ({ children }: { children: ReactNode }) => {
         if (filterOption === 'completed') {
             return tasks.filter(task => task.completed);
         }
-        if (filterOption === 'category') {
-            return tasks.filter(task => task.category === 'your-category'); 
-        }
         return tasks;
     };
 
